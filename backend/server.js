@@ -2,6 +2,7 @@ import http from "http";
 import path from "path";
 import { Server } from "socket.io";
 import express from "express";
+import fs from 'fs';
 
 const app = express();
 const __dirname = path.resolve();
@@ -14,6 +15,15 @@ const httpServer = http.Server(app);
 
 const io = new Server(httpServer, { cors: { origin: "*" } });
 const users = [];
+
+// Function to save each message to the temporary string
+const  temporaryChatHistory = [];
+function saveMessageTemporary(message) {
+  // Append the new message to the chat history
+  temporaryChatHistory.push(message);
+}
+
+
 
 io.on("connection", (socket) => {
   socket.on("onLogin", (user) => {
@@ -40,6 +50,18 @@ io.on("connection", (socket) => {
     }
   });
 
+    
+    // Listen for toggle change from user
+    socket.on("toggleChange", (data) => {
+      // Broadcast the toggle change to the admin
+      const admin = users.find((x) => x.name === "Admin" && x.online);
+      if (admin) {
+        io.to(admin.socketId).emit("toggleUpdate", data);
+      }
+    });
+    
+   
+
   socket.on("disconnect", () => {
     const user = users.find((x) => x.socketId === socket.id);
     if (user) {
@@ -63,6 +85,35 @@ io.on("connection", (socket) => {
       if (user) {
         io.to(user.socketId).emit("message", message);
         user.messages.push(message);
+        //Debugging
+        console.log("Admin said:");
+        console.log(message);
+        saveMessageTemporary(message);
+
+        //to save the chat history
+        if(message.body == "Ending the session. Saving the Chat history") {
+          const chatFile = 'chatHistory'+'-'+message.to+'.json';
+          // Function to save each message to the chat history file immediately
+          function saveMessageToFile(temporaryChatHistory) {
+            console.log(JSON.stringify(temporaryChatHistory));
+
+            // Load existing chat history if the file exists
+            /*
+            if (fs.existsSync(chatFile)) {
+              temporaryChatHistory = JSON.parse(fs.readFileSync(chatFile, 'utf8'));
+            }
+            */
+
+            // Save the updated chat history back to the file
+            fs.writeFileSync(chatFile, JSON.stringify(temporaryChatHistory,null,2));
+          }
+          saveMessageToFile(temporaryChatHistory);
+        }else
+        {
+          //do nothing
+        }
+       
+
       } else {
         io.to(socket.id).emit("message", {
           from: "System",
@@ -77,6 +128,10 @@ io.on("connection", (socket) => {
         const user = users.find((x) => x.name === message.from && x.online);
         if (user) {
           user.messages.push(message);
+          console.log("user said:");
+          console.log(message);
+          saveMessageTemporary(message);
+
         }
       } else {
         io.to(socket.id).emit("message", {
@@ -89,7 +144,10 @@ io.on("connection", (socket) => {
   });
 });
 
+
+
 const PORT = process.env.PORT || 4000;
 httpServer.listen(PORT, () => {
   console.log(`Server started at http://localhost:${PORT}`);
 });
+

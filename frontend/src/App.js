@@ -13,7 +13,7 @@ function App() {
         <header>
           <Navbar bg="dark" variant="dark" expand="lg">
             <Container>
-              <Navbar.Brand>Support Desk</Navbar.Brand>
+              <Navbar.Brand>Symptom Checker</Navbar.Brand>
               <Navbar.Toggle aria-controls="basic-navbar-nav" />
               <Navbar.Collapse id="basic-navbar-nav">
                 <Nav className="me-auto  w-100  justify-content-end">
@@ -34,7 +34,9 @@ function App() {
           </Container>
         </main>
         <footer className="mt-auto">
-          <div className="text-center">All rights reserved</div>
+            <div className="text-center" style={{ fontSize: "12px", marginBottom: "24px" }}>
+            All rights reserved
+          </div>
         </footer>
       </div>
     </BrowserRouter>

@@ -22,6 +22,15 @@ export default function AdminPage() {
   const [messageBody, setMessageBody] = useState("");
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
+
+  //a. Add State for Toggle Buttons on Admin Page
+  const [toggleOne, setToggleOne] = useState(false);
+  const [toggleTwo, setToggleTwo] = useState(false);
+  const [toggleThree, setToggleThree] = useState(false);
+
+  
+
+
   useEffect(() => {
     if (uiMessagesRef.current) {
       uiMessagesRef.current.scrollBy({
@@ -45,6 +54,25 @@ export default function AdminPage() {
           }
         }
       });
+
+      // Listen for toggle updates
+    socket.on("toggleUpdate", (data) => {
+      switch (data.toggleIndex) {
+        case 1:
+          setToggleOne(data.value);
+          break;
+        case 2:
+          setToggleTwo(data.value);
+          break;
+        case 3:
+          setToggleThree(data.value);
+          break;
+        default:
+          break;
+      }
+    });
+
+    
 
       socket.on("updateUser", (updatedUser) => {
         const existUser = users.find((user) => user.name === updatedUser.name);
@@ -158,7 +186,27 @@ export default function AdminPage() {
             <Alert variant="info">Select a user to start chat</Alert>
           ) : (
             <div>
-              <h2>Chat with {selectedUser.name}</h2>
+              <h3>Chat with {selectedUser.name}</h3>
+              
+              <div>
+                <div style={{ display: 'flex', gap: '24px' }}>
+                  <div>
+                    <span style={{ marginRight: '8px' }}>Ethos:</span>
+                    <input type="checkbox" checked={toggleOne} readOnly />
+                  </div>
+                  <div>
+                    <span style={{ marginRight: '8px' }}>Pathos:</span>
+                    <input type="checkbox" checked={toggleTwo} readOnly />
+                  </div>
+                  <div>
+                    <span style={{ marginRight: '8px' }}>Logos:</span>
+                    <input type="checkbox" checked={toggleThree} readOnly />
+                  </div>
+                </div>
+              </div>
+
+              <hr />
+
               <ListGroup ref={uiMessagesRef}>
                 {messages.length === 0 && (
                   <ListGroup.Item>No message</ListGroup.Item>

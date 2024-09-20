@@ -1,0 +1,22 @@
+[
+  {
+    "body": "hi",
+    "from": "rutuja",
+    "to": "Admin"
+  },
+  {
+    "body": "nice to see you!",
+    "from": "Admin",
+    "to": "rutuja"
+  },
+  {
+    "body": "cool",
+    "from": "rutuja",
+    "to": "Admin"
+  },
+  {
+    "body": "Ending the session. Saving the Chat history",
+    "from": "Admin",
+    "to": "rutuja"
+  }
+]

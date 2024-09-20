@@ -1,0 +1,27 @@
+[
+  {
+    "body": "This is Susan",
+    "from": "Susan",
+    "to": "Admin"
+  },
+  {
+    "body": "Hi Susan! Nice to meet you",
+    "from": "Admin",
+    "to": "Susan"
+  },
+  {
+    "body": "I am having headache",
+    "from": "Susan",
+    "to": "Admin"
+  },
+  {
+    "body": "How serious?",
+    "from": "Admin",
+    "to": "Susan"
+  },
+  {
+    "body": "Ending the session. Saving the Chat history",
+    "from": "Admin",
+    "to": "Susan"
+  }
+]

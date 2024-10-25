@@ -1,30 +1,29 @@
 import http from "http";
-import path from "path";
 import { Server } from "socket.io";
 import express from "express";
-import fs from 'fs';
 
 const app = express();
-const __dirname = path.resolve();
-app.use(express.static(path.join(__dirname, "/frontend/build")));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "/frontend/build/index.html"));
+
+// Basic route to verify server is running
+app.get("/", (req, res) => {
+  res.send("Server is running");
 });
 
 const httpServer = http.Server(app);
 
-const io = new Server(httpServer, { cors: { origin: "*" } });
-const users = [];
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.FRONTEND_URL || "*",
+    methods: ["GET", "POST"],
+  },
+});
 
-// Function to save each message to the temporary string
-const  temporaryChatHistory = [];
+const temporaryChatHistory = [];
 function saveMessageTemporary(message) {
-  // Append the new message to the chat history
   temporaryChatHistory.push(message);
 }
 
-
-
+// Rest of your socket.io code remains the same
 io.on("connection", (socket) => {
   socket.on("onLogin", (user) => {
     const updatedUser = {
@@ -50,17 +49,13 @@ io.on("connection", (socket) => {
     }
   });
 
-    
-    // Listen for toggle change from user
-    socket.on("toggleChange", (data) => {
-      // Broadcast the toggle change to the admin
-      const admin = users.find((x) => x.name === "Admin" && x.online);
-      if (admin) {
-        io.to(admin.socketId).emit("toggleUpdate", data);
-      }
-    });
-    
-   
+  // Your existing socket event handlers...
+  socket.on("toggleChange", (data) => {
+    const admin = users.find((x) => x.name === "Admin" && x.online);
+    if (admin) {
+      io.to(admin.socketId).emit("toggleUpdate", data);
+    }
+  });
 
   socket.on("disconnect", () => {
     const user = users.find((x) => x.socketId === socket.id);
@@ -72,6 +67,7 @@ io.on("connection", (socket) => {
       }
     }
   });
+
   socket.on("onUserSelected", (user) => {
     const admin = users.find((x) => x.name === "Admin" && x.online);
     if (admin) {
@@ -79,41 +75,24 @@ io.on("connection", (socket) => {
       io.to(admin.socketId).emit("selectUser", existUser);
     }
   });
+
   socket.on("onMessage", (message) => {
     if (message.from === "Admin") {
       const user = users.find((x) => x.name === message.to && x.online);
       if (user) {
         io.to(user.socketId).emit("message", message);
         user.messages.push(message);
-        //Debugging
-        console.log("Admin said:");
-        console.log(message);
+        console.log("Admin said:", message);
         saveMessageTemporary(message);
 
-        //to save the chat history
-        if(message.body == "Ending the session. Saving the Chat history") {
+        if(message.body === "Ending the session. Saving the Chat history") {
           const chatFile = 'chatHistory'+'-'+message.to+'.json';
-          // Function to save each message to the chat history file immediately
-          function saveMessageToFile(temporaryChatHistory) {
-            console.log(JSON.stringify(temporaryChatHistory));
-
-            // Load existing chat history if the file exists
-            /*
-            if (fs.existsSync(chatFile)) {
-              temporaryChatHistory = JSON.parse(fs.readFileSync(chatFile, 'utf8'));
-            }
-            */
-
-            // Save the updated chat history back to the file
-            fs.writeFileSync(chatFile, JSON.stringify(temporaryChatHistory,null,2));
+          try {
+            fs.writeFileSync(chatFile, JSON.stringify(temporaryChatHistory, null, 2));
+          } catch (error) {
+            console.error('Error saving chat history:', error);
           }
-          saveMessageToFile(temporaryChatHistory);
-        }else
-        {
-          //do nothing
         }
-       
-
       } else {
         io.to(socket.id).emit("message", {
           from: "System",
@@ -128,10 +107,8 @@ io.on("connection", (socket) => {
         const user = users.find((x) => x.name === message.from && x.online);
         if (user) {
           user.messages.push(message);
-          console.log("user said:");
-          console.log(message);
+          console.log("user said:", message);
           saveMessageTemporary(message);
-
         }
       } else {
         io.to(socket.id).emit("message", {
@@ -144,10 +121,7 @@ io.on("connection", (socket) => {
   });
 });
 
-
-
 const PORT = process.env.PORT || 4000;
 httpServer.listen(PORT, () => {
-  console.log(`Server started at http://localhost:${PORT}`);
+  console.log(`Server started on port ${PORT}`);
 });
-

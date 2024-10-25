@@ -4,7 +4,9 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import socketIOClient from "socket.io-client";
 
-const ENDPOINT = "http://127.0.0.1:4000"; // Adjust this to your server's address
+//const ENDPOINT = "http://127.0.0.1:4000"; // Adjust this to your server's address
+const ENDPOINT = "https://healthcare-chatbot-prototype.onrender.com"; // Adjust this to your server's address
+
 
 export default function ToggleButtons() {
   const [toggleOne, setToggleOne] = useState(false);

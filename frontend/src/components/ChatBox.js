@@ -16,7 +16,8 @@ import ToggleButtons from "./ToggleButtons"; // Import the ToggleButtons compone
 
 const ENDPOINT =
   window.location.host.indexOf("localhost") >= 0
-    ? "http://127.0.0.1:4000"
+    //? "http://127.0.0.1:4000" //replace the link from Render
+    ? "https://healthcare-chatbot-prototype.onrender.com" //replace the link from Render
     : window.location.host;
 
 export default function ChatBox() {

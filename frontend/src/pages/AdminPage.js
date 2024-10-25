@@ -12,7 +12,8 @@ import Button from "react-bootstrap/Button";
 
 const ENDPOINT =
   window.location.host.indexOf("localhost") >= 0
-    ? "http://127.0.0.1:4000"
+    //? "http://127.0.0.1:4000" //Change the link from Render
+    ? "https://healthcare-chatbot-prototype.onrender.com" //Change the link from Render
     : window.location.host;
 
 export default function AdminPage() {

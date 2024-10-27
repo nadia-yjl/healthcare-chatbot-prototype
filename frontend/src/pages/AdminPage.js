@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import socketIOClient from "socket.io-client";
-
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import ListGroup from "react-bootstrap/ListGroup";
@@ -10,11 +9,8 @@ import FormControl from "react-bootstrap/FormControl";
 import InputGroup from "react-bootstrap/InputGroup";
 import Button from "react-bootstrap/Button";
 
-const ENDPOINT =
-  window.location.host.indexOf("localhost") >= 0
-    //? "http://127.0.0.1:4000" //Change the link from Render
-    ? "https://healthcare-chatbot-prototype.onrender.com" //Change the link from Render
-    : window.location.host;
+// Update ENDPOINT configuration
+const ENDPOINT = "https://healthcare-chatbot-prototype.onrender.com";
 
 export default function AdminPage() {
   const [selectedUser, setSelectedUser] = useState({});
@@ -23,14 +19,45 @@ export default function AdminPage() {
   const [messageBody, setMessageBody] = useState("");
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
+  const [connected, setConnected] = useState(false);
 
-  //a. Add State for Toggle Buttons on Admin Page
+  //Add State for Toggle Buttons on Admin Page
   const [toggleOne, setToggleOne] = useState(false);
   const [toggleTwo, setToggleTwo] = useState(false);
   const [toggleThree, setToggleThree] = useState(false);
 
-  
+  useEffect(() => {
+    if (!socket) {
+      const sk = socketIOClient(ENDPOINT, {
+        transports: ['websocket'],
+        cors: {
+          origin: "*",
+          credentials: true
+        }
+      });
 
+      sk.on('connect', () => {
+        console.log('Connected to server');
+        setConnected(true);
+        sk.emit("onLogin", {
+          name: "Admin"
+        });
+      });
+
+      sk.on('connect_error', (error) => {
+        console.error('Connection error:', error);
+        setConnected(false);
+      });
+
+      setSocket(sk);
+    }
+
+    return () => {
+      if (socket) {
+        socket.disconnect();
+      }
+    };
+  }, [socket]);
 
   useEffect(() => {
     if (uiMessagesRef.current) {
@@ -40,15 +67,17 @@ export default function AdminPage() {
         behavior: "smooth",
       });
     }
+
     if (socket) {
       socket.on("message", (data) => {
+        console.log('Received message:', data);
         if (selectedUser.name === data.from) {
-          setMessages([...messages, data]);
+          setMessages(prev => [...prev, data]);
         } else {
           const existUser = users.find((user) => user.name === data.from);
           if (existUser) {
-            setUsers(
-              users.map((user) =>
+            setUsers(prev =>
+              prev.map((user) =>
                 user.name === existUser.name ? { ...user, unread: true } : user
               )
             );
@@ -56,52 +85,55 @@ export default function AdminPage() {
         }
       });
 
-      // Listen for toggle updates
-    socket.on("toggleUpdate", (data) => {
-      switch (data.toggleIndex) {
-        case 1:
-          setToggleOne(data.value);
-          break;
-        case 2:
-          setToggleTwo(data.value);
-          break;
-        case 3:
-          setToggleThree(data.value);
-          break;
-        default:
-          break;
-      }
-    });
-
-    
-
-      socket.on("updateUser", (updatedUser) => {
-        const existUser = users.find((user) => user.name === updatedUser.name);
-        if (existUser) {
-          setUsers(
-            users.map((user) =>
-              user.name === existUser.name ? updatedUser : user
-            )
-          );
-        } else {
-          setUsers([...users, updatedUser]);
+      socket.on("toggleUpdate", (data) => {
+        console.log('Received toggle update:', data);
+        switch (data.toggleIndex) {
+          case 1:
+            setToggleOne(data.value);
+            break;
+          case 2:
+            setToggleTwo(data.value);
+            break;
+          case 3:
+            setToggleThree(data.value);
+            break;
+          default:
+            break;
         }
       });
+
+      socket.on("updateUser", (updatedUser) => {
+        console.log('Received user update:', updatedUser);
+        setUsers(prev => {
+          const existUser = prev.find((user) => user.name === updatedUser.name);
+          if (existUser) {
+            return prev.map((user) =>
+              user.name === existUser.name ? updatedUser : user
+            );
+          }
+          return [...prev, updatedUser];
+        });
+      });
+
       socket.on("listUsers", (updatedUsers) => {
+        console.log('Received users list:', updatedUsers);
         setUsers(updatedUsers);
       });
 
       socket.on("selectUser", (user) => {
-        setMessages(user.messages);
+        console.log('User selected:', user);
+        setMessages(user.messages || []);
       });
-    } else {
-      const sk = socketIOClient(ENDPOINT);
-      setSocket(sk);
-      sk.emit("onLogin", {
-        name: "Admin",
-      });
+
+      return () => {
+        socket.off("message");
+        socket.off("updateUser");
+        socket.off("listUsers");
+        socket.off("selectUser");
+        socket.off("toggleUpdate");
+      };
     }
-  }, [messages, selectedUser, socket, users]);
+  }, [socket, selectedUser.name, users]);
 
   const selectUser = (user) => {
     setSelectedUser(user);
@@ -139,7 +171,10 @@ export default function AdminPage() {
   return (
     <Row>
       <Col sm={3}>
-        {users.filter((x) => x.name !== "Admin").length === 0 && (
+        {!connected && (
+          <Alert variant="warning">Connecting to server...</Alert>
+        )}
+        {connected && users.filter((x) => x.name !== "Admin").length === 0 && (
           <Alert variant="info">No User Found</Alert>
         )}
         <ListGroup>

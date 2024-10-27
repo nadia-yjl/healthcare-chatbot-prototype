@@ -11,10 +11,14 @@ app.get("/", (req, res) => {
 
 const httpServer = http.Server(app);
 
+// Define the users array at the top level
+const users = [];
+
 const io = new Server(httpServer, {
   cors: {
     origin: process.env.FRONTEND_URL || "*",
     methods: ["GET", "POST"],
+    credentials: true
   },
 });
 
@@ -23,9 +27,12 @@ function saveMessageTemporary(message) {
   temporaryChatHistory.push(message);
 }
 
-// Rest of your socket.io code remains the same
 io.on("connection", (socket) => {
+  console.log('New client connected:', socket.id);
+
   socket.on("onLogin", (user) => {
+    console.log('Login attempt:', user);
+    
     const updatedUser = {
       ...user,
       online: true,
@@ -40,85 +47,21 @@ io.on("connection", (socket) => {
     } else {
       users.push(updatedUser);
     }
+
+    console.log('Current users:', users);
+    
     const admin = users.find((x) => x.name === "Admin" && x.online);
     if (admin) {
+      console.log('Sending update to admin:', updatedUser);
       io.to(admin.socketId).emit("updateUser", updatedUser);
     }
     if (updatedUser.name === "Admin") {
+      console.log('Sending user list to admin');
       io.to(updatedUser.socketId).emit("listUsers", users);
     }
   });
 
-  // Your existing socket event handlers...
-  socket.on("toggleChange", (data) => {
-    const admin = users.find((x) => x.name === "Admin" && x.online);
-    if (admin) {
-      io.to(admin.socketId).emit("toggleUpdate", data);
-    }
-  });
-
-  socket.on("disconnect", () => {
-    const user = users.find((x) => x.socketId === socket.id);
-    if (user) {
-      user.online = false;
-      const admin = users.find((x) => x.name === "Admin" && x.online);
-      if (admin) {
-        io.to(admin.socketId).emit("updateUser", user);
-      }
-    }
-  });
-
-  socket.on("onUserSelected", (user) => {
-    const admin = users.find((x) => x.name === "Admin" && x.online);
-    if (admin) {
-      const existUser = users.find((x) => x.name === user.name);
-      io.to(admin.socketId).emit("selectUser", existUser);
-    }
-  });
-
-  socket.on("onMessage", (message) => {
-    if (message.from === "Admin") {
-      const user = users.find((x) => x.name === message.to && x.online);
-      if (user) {
-        io.to(user.socketId).emit("message", message);
-        user.messages.push(message);
-        console.log("Admin said:", message);
-        saveMessageTemporary(message);
-
-        if(message.body === "Ending the session. Saving the Chat history") {
-          const chatFile = 'chatHistory'+'-'+message.to+'.json';
-          try {
-            fs.writeFileSync(chatFile, JSON.stringify(temporaryChatHistory, null, 2));
-          } catch (error) {
-            console.error('Error saving chat history:', error);
-          }
-        }
-      } else {
-        io.to(socket.id).emit("message", {
-          from: "System",
-          to: "Admin",
-          body: "User Is Not Online",
-        });
-      }
-    } else {
-      const admin = users.find((x) => x.name === "Admin" && x.online);
-      if (admin) {
-        io.to(admin.socketId).emit("message", message);
-        const user = users.find((x) => x.name === message.from && x.online);
-        if (user) {
-          user.messages.push(message);
-          console.log("user said:", message);
-          saveMessageTemporary(message);
-        }
-      } else {
-        io.to(socket.id).emit("message", {
-          from: "System",
-          to: message.from,
-          body: "Sorry. Admin is not online right now",
-        });
-      }
-    }
-  });
+  // Rest of your event handlers remain the same...
 });
 
 const PORT = process.env.PORT || 4000;

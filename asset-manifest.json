@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/healthcare-chatbot-prototype/static/css/main.4f720035.css",
-    "main.js": "/healthcare-chatbot-prototype/static/js/main.d691198f.js",
+    "main.js": "/healthcare-chatbot-prototype/static/js/main.583e9648.js",
     "static/js/787.cda612ba.chunk.js": "/healthcare-chatbot-prototype/static/js/787.cda612ba.chunk.js",
     "static/media/certified.png": "/healthcare-chatbot-prototype/static/media/certified.1ce60aca6b5d016d9807.png",
     "index.html": "/healthcare-chatbot-prototype/index.html",
     "main.4f720035.css.map": "/healthcare-chatbot-prototype/static/css/main.4f720035.css.map",
-    "main.d691198f.js.map": "/healthcare-chatbot-prototype/static/js/main.d691198f.js.map",
+    "main.583e9648.js.map": "/healthcare-chatbot-prototype/static/js/main.583e9648.js.map",
     "787.cda612ba.chunk.js.map": "/healthcare-chatbot-prototype/static/js/787.cda612ba.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.4f720035.css",
-    "static/js/main.d691198f.js"
+    "static/js/main.583e9648.js"
   ]
 }

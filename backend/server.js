@@ -54,12 +54,12 @@ io.on("connection", (socket) => {
 
     console.log('Current users:', users);
     
-    const admin = users.find((x) => x.name === "Admin" && x.online);
+    const admin = users.find((x) => x.name === "SymptoBot" && x.online);
     if (admin) {
       console.log('Sending update to admin:', updatedUser);
       io.to(admin.socketId).emit("updateUser", updatedUser);
     }
-    if (updatedUser.name === "Admin") {
+    if (updatedUser.name === "SymptoBot") {
       console.log('Sending user list to admin');
       io.to(updatedUser.socketId).emit("listUsers", users);
     }
@@ -67,13 +67,13 @@ io.on("connection", (socket) => {
 
   socket.on("onMessage", (message) => {
     console.log('Received message:', message);
-    if (message.from === "Admin") {
+    if (message.from === "SymptoBot") {
       const user = users.find((x) => x.name === message.to && x.online);
       if (user) {
         console.log('Sending message to user:', message);
         io.to(user.socketId).emit("message", message);
         user.messages.push(message);
-        console.log("Admin said:", message);
+        console.log("SymptoBot said:", message);
         saveMessageTemporary(message);
 
         if(message.body === "Ending the session. Saving the Chat history") {
@@ -87,12 +87,12 @@ io.on("connection", (socket) => {
       } else {
         io.to(socket.id).emit("message", {
           from: "System",
-          to: "Admin",
+          to: "SymptoBot",
           body: "User Is Not Online",
         });
       }
     } else {
-      const admin = users.find((x) => x.name === "Admin" && x.online);
+      const admin = users.find((x) => x.name === "SymptoBot" && x.online);
       if (admin) {
         console.log('Sending message to admin:', message);
         io.to(admin.socketId).emit("message", message);
@@ -106,7 +106,7 @@ io.on("connection", (socket) => {
         io.to(socket.id).emit("message", {
           from: "System",
           to: message.from,
-          body: "Sorry. Admin is not online right now",
+          body: "Sorry. SymptoBot is not online right now",
         });
       }
     }
@@ -114,7 +114,7 @@ io.on("connection", (socket) => {
 
   socket.on("toggleChange", (data) => {
     console.log('Toggle change:', data);
-    const admin = users.find((x) => x.name === "Admin" && x.online);
+    const admin = users.find((x) => x.name === "SymptoBot" && x.online);
     if (admin) {
       io.to(admin.socketId).emit("toggleUpdate", data);
     }
@@ -125,7 +125,7 @@ io.on("connection", (socket) => {
     if (user) {
       user.online = false;
       console.log('User disconnected:', user.name);
-      const admin = users.find((x) => x.name === "Admin" && x.online);
+      const admin = users.find((x) => x.name === "SymptoBot" && x.online);
       if (admin) {
         io.to(admin.socketId).emit("updateUser", user);
       }
@@ -134,7 +134,7 @@ io.on("connection", (socket) => {
 
   socket.on("onUserSelected", (user) => {
     console.log('User selected:', user);
-    const admin = users.find((x) => x.name === "Admin" && x.online);
+    const admin = users.find((x) => x.name === "SymptoBot" && x.online);
     if (admin) {
       const existUser = users.find((x) => x.name === user.name);
       io.to(admin.socketId).emit("selectUser", existUser);

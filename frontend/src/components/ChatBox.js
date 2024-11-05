@@ -114,7 +114,7 @@ export default function ChatBox() {
       const newMessage = {
         body: messageBody,
         from: userName,
-        to: "Admin"
+        to: "SymptoBot"
       };
       console.log('Sending message:', newMessage);
       
@@ -329,7 +329,7 @@ export default function ChatBox() {
       const newMessage = {
         body: messageBody,
         from: userName,
-        to: "Admin"
+        to: "SymptoBot"
       };
       console.log('Sending message:', newMessage);
       
@@ -497,13 +497,13 @@ export default function ChatBox() {
     } else {
       setMessages([
         ...messages,
-        { body: messageBody, from: userName, to: "Admin" },
+        { body: messageBody, from: userName, to: "SymptoBot" },
       ]);
       setTimeout(() => {
         socket.emit("onMessage", {
           body: messageBody,
           from: userName,
-          to: "Admin",
+          to: "SymptoBot",
         });
       }, 1000);
       setMessageBody("");
@@ -650,13 +650,13 @@ export default function ChatBox() {
     } else {
       setMessages([
         ...messages,
-        { body: messageBody, from: userName, to: "Admin" },
+        { body: messageBody, from: userName, to: "SymptoBot" },
       ]);
       setTimeout(() => {
         socket.emit("onMessage", {
           body: messageBody,
           from: userName,
-          to: "Admin",
+          to: "SymptoBot",
         });
       }, 1000);
       setMessageBody("");

@@ -18,7 +18,7 @@ function App() {
               <Navbar.Collapse id="basic-navbar-nav">
                 <Nav className="me-auto w-100 justify-content-end">
                   <a href="/#/admin" className="nav-link" target="_blank">
-                    Admin
+                    SymptoBot
                   </a>
                 </Nav>
               </Navbar.Collapse>

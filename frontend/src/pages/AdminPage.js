@@ -21,7 +21,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState([]);
   const [connected, setConnected] = useState(false);
 
-  //Add State for Toggle Buttons on Admin Page
+  //Add State for Toggle Buttons on SymptoBot Page
   const [toggleOne, setToggleOne] = useState(false);
   const [toggleTwo, setToggleTwo] = useState(false);
   const [toggleThree, setToggleThree] = useState(false);
@@ -40,7 +40,7 @@ export default function AdminPage() {
         console.log('Connected to server');
         setConnected(true);
         sk.emit("onLogin", {
-          name: "Admin"
+          name: "SymptoBot"
         });
       });
 
@@ -155,12 +155,12 @@ export default function AdminPage() {
     } else {
       setMessages([
         ...messages,
-        { body: messageBody, from: "Admin", to: selectedUser.name },
+        { body: messageBody, from: "SymptoBot", to: selectedUser.name },
       ]);
       setTimeout(() => {
         socket.emit("onMessage", {
           body: messageBody,
-          from: "Admin",
+          from: "SymptoBot",
           to: selectedUser.name,
         });
       }, 1000);
@@ -174,12 +174,12 @@ export default function AdminPage() {
         {!connected && (
           <Alert variant="warning">Connecting to server...</Alert>
         )}
-        {connected && users.filter((x) => x.name !== "Admin").length === 0 && (
+        {connected && users.filter((x) => x.name !== "SymptoBot").length === 0 && (
           <Alert variant="info">No User Found</Alert>
         )}
         <ListGroup>
           {users
-            .filter((x) => x.name !== "Admin")
+            .filter((x) => x.name !== "SymptoBot")
             .map((user) => (
               <ListGroup.Item
                 action
